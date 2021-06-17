@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 	
@@ -34,7 +35,7 @@ public class MainViewController implements Initializable {
 	
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 	
 	@FXML
@@ -63,6 +64,30 @@ public class MainViewController implements Initializable {
 			
 			mainVBox.getChildren().add(mainMenu); //Add o mainMenu novamente ao MainVBox
 			mainVBox.getChildren().addAll(newVBox.getChildren()); //addAll adiciona uma coleção = filhos do newVBox
+			
+		} catch(IOException e) {
+			Alerts.showAlert("IOException", "Error loading view", e.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	private synchronized void loadView2(String absoluteName) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVBox = loader.load();
+			
+			Scene mainScene = Main.getMainScene(); //pega a MainScene do Main, que é a MainScene da janela principal da application
+			VBox mainVBox = (VBox)(((ScrollPane)mainScene.getRoot()).getContent()); //.getRoot pega o primeiro elemento da View //.getCOntent pega o content do ScrollPane(que é o primeiro elemento da view)
+			
+			Node mainMenu = mainVBox.getChildren().get(0); //Guarda na variável o primeiro filho do MainVBox
+			mainVBox.getChildren().clear(); //limpa todos os filhos do MainVBox
+			
+			mainVBox.getChildren().add(mainMenu); //Add o mainMenu novamente ao MainVBox
+			mainVBox.getChildren().addAll(newVBox.getChildren()); //addAll adiciona uma coleção = filhos do newVBox
+			
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
 			
 		} catch(IOException e) {
 			Alerts.showAlert("IOException", "Error loading view", e.getMessage(), AlertType.ERROR);
